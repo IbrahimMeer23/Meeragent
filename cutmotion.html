@@ -1,0 +1,1356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CutMotion — AI Video Maker</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&display=swap');
+
+:root {
+  --bg: #05070d;
+  --s1: #0a0e1a;
+  --s2: #0f1525;
+  --border: #1a2035;
+  --border2: #242d45;
+  --a1: #6c3fff;
+  --a2: #ff3d6e;
+  --a3: #00d4ff;
+  --a4: #ffb800;
+  --text: #eef0f8;
+  --muted: #5a6380;
+  --muted2: #8892aa;
+  --success: #00e676;
+  --r: 12px;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body {
+  font-family:'Inter',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+
+/* HEADER */
+.hdr {
+  height:52px;
+  background:var(--s1);
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  padding:0 16px;
+  gap:12px;
+  flex-shrink:0;
+  z-index:100;
+}
+
+.logo {
+  display:flex;align-items:center;gap:10px;
+  font-family:'Syne',sans-serif;
+  font-size:20px;font-weight:800;
+  letter-spacing:-0.5px;
+}
+
+.logo-mark {
+  width:34px;height:34px;
+  background:linear-gradient(135deg,var(--a1),var(--a2));
+  border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:17px;
+  box-shadow:0 0 20px rgba(108,63,255,0.5);
+  animation:logoPulse 3s ease-in-out infinite;
+}
+@keyframes logoPulse{0%,100%{box-shadow:0 0 20px rgba(108,63,255,0.5);}50%{box-shadow:0 0 35px rgba(255,61,110,0.6);}}
+
+.logo-text{color:var(--text);}
+.logo-text span{color:var(--a1);}
+
+.hdr-badge {
+  background:linear-gradient(90deg,rgba(108,63,255,0.2),rgba(255,61,110,0.2));
+  border:1px solid rgba(108,63,255,0.4);
+  border-radius:100px;
+  padding:3px 10px;
+  font-size:10px;
+  font-weight:600;
+  color:var(--a3);
+  letter-spacing:0.5px;
+}
+
+.hdr-right{margin-left:auto;display:flex;gap:8px;align-items:center;}
+
+.btn {
+  display:inline-flex;align-items:center;gap:6px;
+  padding:7px 14px;border-radius:8px;
+  font-family:'Inter',sans-serif;font-size:13px;font-weight:500;
+  cursor:pointer;border:none;transition:all 0.2s;
+}
+.btn-ghost{background:transparent;color:var(--muted2);border:1px solid var(--border2);}
+.btn-ghost:hover{color:var(--text);border-color:var(--a1);}
+.btn-primary{background:linear-gradient(135deg,var(--a1),#4a2bcf);color:#fff;box-shadow:0 0 20px rgba(108,63,255,0.3);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 24px rgba(108,63,255,0.5);}
+.btn-green{background:linear-gradient(135deg,#00c853,#00960f);color:#fff;}
+.btn-red{background:linear-gradient(135deg,var(--a2),#c0173b);color:#fff;}
+
+/* MAIN LAYOUT */
+.main{flex:1;display:flex;overflow:hidden;}
+
+/* LEFT — INPUT PANEL */
+.panel-l {
+  width:320px;
+  background:var(--s1);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  flex-shrink:0;
+  overflow-y:auto;
+}
+
+.p-section{padding:14px;border-bottom:1px solid var(--border);}
+
+.p-label{
+  font-size:10px;font-weight:600;
+  text-transform:uppercase;letter-spacing:1px;
+  color:var(--muted);margin-bottom:10px;
+}
+
+.textarea-main {
+  width:100%;min-height:110px;resize:vertical;
+  background:var(--s2);border:1px solid var(--border2);
+  color:var(--text);font-family:'Inter',sans-serif;font-size:13px;
+  padding:12px;border-radius:var(--r);line-height:1.6;
+  transition:border-color 0.2s;
+}
+.textarea-main:focus{outline:none;border-color:var(--a1);}
+.textarea-main::placeholder{color:var(--muted);}
+
+.select-row{display:flex;gap:8px;margin-top:8px;}
+
+.sel {
+  flex:1;background:var(--s2);border:1px solid var(--border2);
+  color:var(--text);font-family:'Inter',sans-serif;font-size:12px;
+  padding:8px 10px;border-radius:8px;cursor:pointer;
+}
+.sel:focus{outline:none;border-color:var(--a1);}
+
+/* Scene cards */
+.scenes-list{display:flex;flex-direction:column;gap:8px;padding:14px;}
+
+.scene-card {
+  background:var(--s2);border:1px solid var(--border2);
+  border-radius:10px;padding:10px;cursor:pointer;
+  transition:all 0.2s;position:relative;overflow:hidden;
+}
+.scene-card:hover{border-color:var(--a1);}
+.scene-card.active{border-color:var(--a1);background:rgba(108,63,255,0.08);}
+.scene-card.generating{border-color:var(--a4);animation:cardPulse 1s ease-in-out infinite;}
+@keyframes cardPulse{0%,100%{opacity:1;}50%{opacity:0.7;}}
+.scene-card.done{border-color:var(--success);}
+
+.sc-top{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.sc-num{
+  width:22px;height:22px;border-radius:6px;
+  background:linear-gradient(135deg,var(--a1),var(--a2));
+  font-size:10px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.sc-title{font-size:12px;font-weight:600;flex:1;}
+.sc-status{font-size:14px;}
+.sc-prompt{font-size:11px;color:var(--muted2);line-height:1.4;}
+.sc-duration{font-size:10px;color:var(--a3);margin-top:4px;}
+
+/* Voice settings */
+.voice-row{display:flex;align-items:center;gap:8px;margin-top:6px;}
+.voice-label{font-size:11px;color:var(--muted2);white-space:nowrap;}
+.voice-range{
+  -webkit-appearance:none;flex:1;height:3px;
+  background:var(--border2);border-radius:2px;outline:none;cursor:pointer;
+}
+.voice-range::-webkit-slider-thumb{
+  -webkit-appearance:none;width:13px;height:13px;
+  border-radius:50%;background:var(--a1);cursor:pointer;
+}
+
+/* RIGHT — PREVIEW */
+.panel-r{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+
+/* Canvas area */
+.preview-wrap {
+  flex:1;background:#000;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;overflow:hidden;
+}
+
+#mainCanvas{
+  max-width:100%;max-height:100%;
+  display:block;
+  box-shadow:0 0 80px rgba(0,0,0,0.9);
+}
+
+/* Overlay controls */
+.canvas-overlay{
+  position:absolute;inset:0;
+  display:flex;align-items:flex-end;
+  background:linear-gradient(transparent 60%,rgba(0,0,0,0.85));
+  padding:16px;
+  pointer-events:none;
+}
+.canvas-ctrls{
+  width:100%;display:flex;flex-direction:column;gap:8px;
+  pointer-events:all;
+}
+
+.prog-bar-wrap{
+  width:100%;height:4px;background:rgba(255,255,255,0.15);
+  border-radius:2px;cursor:pointer;position:relative;overflow:hidden;
+}
+.prog-bar-fill{height:100%;background:linear-gradient(90deg,var(--a1),var(--a2));border-radius:2px;transition:width 0.1s;}
+
+.play-row{display:flex;align-items:center;gap:10px;}
+
+.play-btn-big{
+  width:44px;height:44px;border-radius:50%;
+  background:linear-gradient(135deg,var(--a1),var(--a2));
+  border:none;color:#fff;font-size:18px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 24px rgba(108,63,255,0.5);transition:all 0.2s;
+}
+.play-btn-big:hover{transform:scale(1.1);}
+
+.time-badge{
+  font-family:'Syne',sans-serif;font-size:13px;
+  color:rgba(255,255,255,0.8);
+}
+
+.scene-nav{display:flex;gap:6px;margin-left:auto;}
+.snav-btn{
+  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);
+  color:#fff;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;
+  transition:all 0.2s;
+}
+.snav-btn:hover{background:rgba(255,255,255,0.2);}
+
+/* Bottom — timeline strip */
+.timeline-strip {
+  height:82px;background:var(--s1);border-top:1px solid var(--border);
+  display:flex;align-items:center;padding:0 12px;gap:6px;
+  overflow-x:auto;flex-shrink:0;
+}
+
+.strip-thumb {
+  width:80px;height:56px;border-radius:8px;flex-shrink:0;
+  background:var(--s2);border:2px solid var(--border2);
+  cursor:pointer;transition:all 0.2s;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  position:relative;font-size:20px;
+}
+.strip-thumb:hover{border-color:var(--a1);}
+.strip-thumb.active{border-color:var(--a1);box-shadow:0 0 12px rgba(108,63,255,0.4);}
+.strip-thumb img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;}
+.strip-thumb .th-num{
+  position:absolute;bottom:2px;right:4px;
+  font-size:9px;font-weight:700;color:#fff;
+  background:rgba(0,0,0,0.7);padding:1px 4px;border-radius:3px;
+}
+.strip-thumb .th-spin{
+  width:20px;height:20px;border:2px solid var(--a4);
+  border-top-color:transparent;border-radius:50%;
+  animation:spin 0.8s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* Voice panel bottom */
+.voice-panel {
+  height:48px;background:var(--s2);border-top:1px solid var(--border);
+  display:flex;align-items:center;padding:0 14px;gap:12px;flex-shrink:0;
+}
+.voice-panel .vp-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;}
+.voice-speaking{
+  display:flex;align-items:center;gap:3px;
+}
+.vs-bar{
+  width:2px;border-radius:1px;background:var(--a2);
+  animation:vbar 0.6s ease-in-out infinite;
+}
+.vs-bar:nth-child(2){animation-delay:0.1s;height:10px;}
+.vs-bar:nth-child(3){animation-delay:0.2s;height:16px;}
+.vs-bar:nth-child(4){animation-delay:0.15s;height:12px;}
+.vs-bar:nth-child(5){animation-delay:0.05s;height:8px;}
+@keyframes vbar{0%,100%{transform:scaleY(0.4);}50%{transform:scaleY(1);}}
+
+/* Generate modal */
+.gen-overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,0.85);
+  backdrop-filter:blur(8px);
+  z-index:1000;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;pointer-events:none;transition:opacity 0.3s;
+}
+.gen-overlay.open{opacity:1;pointer-events:all;}
+
+.gen-modal{
+  background:var(--s1);border:1px solid var(--border2);
+  border-radius:20px;padding:32px;width:460px;max-width:90vw;
+  box-shadow:0 40px 120px rgba(0,0,0,0.7);
+  transform:scale(0.95);transition:transform 0.3s;
+}
+.gen-overlay.open .gen-modal{transform:scale(1);}
+
+.gen-title{
+  font-family:'Syne',sans-serif;font-size:22px;font-weight:800;
+  margin-bottom:6px;
+}
+.gen-sub{font-size:13px;color:var(--muted2);margin-bottom:24px;line-height:1.6;}
+
+.gen-step{
+  display:flex;align-items:center;gap:12px;
+  padding:12px;border-radius:10px;
+  margin-bottom:8px;
+  background:var(--s2);border:1px solid var(--border);
+  transition:all 0.3s;
+}
+.gen-step.active{border-color:var(--a1);background:rgba(108,63,255,0.1);}
+.gen-step.done{border-color:var(--success);background:rgba(0,230,118,0.05);}
+
+.gs-icon{font-size:22px;flex-shrink:0;}
+.gs-info{flex:1;}
+.gs-name{font-size:13px;font-weight:600;}
+.gs-detail{font-size:11px;color:var(--muted2);margin-top:2px;}
+.gs-status{font-size:18px;flex-shrink:0;}
+
+.gen-prog-wrap{height:6px;background:var(--border);border-radius:3px;margin-top:20px;overflow:hidden;}
+.gen-prog-fill{
+  height:100%;background:linear-gradient(90deg,var(--a1),var(--a2),var(--a3));
+  background-size:200%;border-radius:3px;
+  transition:width 0.5s;
+  animation:shimmer 2s linear infinite;
+}
+@keyframes shimmer{0%{background-position:0%;}100%{background-position:200%;}}
+
+/* Toast */
+.toast-wrap{position:fixed;bottom:16px;right:16px;z-index:2000;display:flex;flex-direction:column;gap:6px;}
+.toast{
+  background:var(--s1);border:1px solid var(--border2);
+  border-radius:10px;padding:11px 15px;font-size:12px;
+  display:flex;align-items:center;gap:9px;
+  box-shadow:0 8px 28px rgba(0,0,0,0.5);
+  animation:toastIn 0.3s ease;max-width:290px;
+}
+@keyframes toastIn{from{transform:translateX(110%);opacity:0;}to{transform:translateX(0);opacity:1;}}
+.toast.s{border-left:3px solid var(--success);}
+.toast.e{border-left:3px solid var(--a2);}
+.toast.i{border-left:3px solid var(--a1);}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:var(--s1);}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px;}
+
+/* Empty state */
+.empty-canvas{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:16px;color:var(--muted);
+}
+.ec-icon{font-size:64px;opacity:0.3;}
+.ec-text{font-size:14px;text-align:center;line-height:1.6;}
+
+/* Voice select chips */
+.voice-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.vchip{
+  padding:5px 12px;border-radius:100px;
+  background:var(--s2);border:1px solid var(--border2);
+  font-size:11px;color:var(--muted2);cursor:pointer;transition:all 0.2s;
+}
+.vchip:hover{border-color:var(--a3);}
+.vchip.active{border-color:var(--a3);color:var(--a3);background:rgba(0,212,255,0.08);}
+
+/* Export panel */
+.export-row{
+  display:flex;gap:6px;padding:10px 14px;
+  background:var(--s2);border-bottom:1px solid var(--border);
+  align-items:center;
+}
+.exp-btn{
+  flex:1;padding:8px;border-radius:8px;
+  background:var(--s1);border:1px solid var(--border2);
+  color:var(--muted2);font-size:11px;font-weight:500;
+  cursor:pointer;transition:all 0.2s;text-align:center;
+}
+.exp-btn:hover{border-color:var(--a1);color:var(--text);}
+
+/* Aspect ratio */
+.ratio-chips{display:flex;gap:5px;margin-top:6px;}
+.rchip{
+  padding:4px 10px;border-radius:100px;
+  background:var(--s2);border:1px solid var(--border2);
+  font-size:10px;color:var(--muted2);cursor:pointer;transition:all 0.2s;
+}
+.rchip:hover,.rchip.active{border-color:var(--a2);color:var(--a2);}
+
+/* Image style chips */
+.style-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.schip{
+  padding:4px 10px;border-radius:100px;
+  background:var(--s2);border:1px solid var(--border2);
+  font-size:10px;color:var(--muted2);cursor:pointer;transition:all 0.2s;
+}
+.schip:hover,.schip.active{border-color:var(--a1);color:var(--a1);}
+
+.anim-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px;}
+.achip{
+  padding:4px 10px;border-radius:100px;
+  background:var(--s2);border:1px solid var(--border2);
+  font-size:10px;color:var(--muted2);cursor:pointer;transition:all 0.2s;
+}
+.achip:hover,.achip.active{border-color:var(--a4);color:var(--a4);}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+  <div class="logo">
+    <div class="logo-mark">✦</div>
+    <div class="logo-text">Cut<span>Motion</span></div>
+  </div>
+  <div class="hdr-badge">AI • FREE • UNLIMITED</div>
+  <div class="hdr-right">
+    <button class="btn btn-ghost" onclick="clearAll()">🗑 Clear</button>
+    <button class="btn btn-ghost" onclick="exportVideo()">📥 Export</button>
+    <button class="btn btn-primary" onclick="openGenModal()">✦ Generate Video</button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- LEFT PANEL -->
+  <div class="panel-l">
+
+    <!-- Prompt -->
+    <div class="p-section">
+      <div class="p-label">✦ Video Script / Idea</div>
+      <textarea class="textarea-main" id="mainPrompt" placeholder="Describe your video here...
+
+Example: A cinematic journey through the mountains at sunset. Show a lone traveler walking on a misty trail, then reaching a cliff with a breathtaking view of the valley below."></textarea>
+
+      <div class="select-row">
+        <select class="sel" id="numScenes">
+          <option value="3">3 Scenes</option>
+          <option value="4">4 Scenes</option>
+          <option value="5" selected>5 Scenes</option>
+          <option value="6">6 Scenes</option>
+          <option value="8">8 Scenes</option>
+        </select>
+        <select class="sel" id="duration">
+          <option value="3">3s each</option>
+          <option value="4">4s each</option>
+          <option value="5" selected>5s each</option>
+          <option value="7">7s each</option>
+        </select>
+      </div>
+
+      <div class="p-label" style="margin-top:12px;">🎨 Image Style</div>
+      <div class="style-chips" id="styleChips">
+        <div class="schip active" onclick="selectChip(this,'styleChips')">Cinematic</div>
+        <div class="schip" onclick="selectChip(this,'styleChips')">Anime</div>
+        <div class="schip" onclick="selectChip(this,'styleChips')">Realistic</div>
+        <div class="schip" onclick="selectChip(this,'styleChips')">Digital Art</div>
+        <div class="schip" onclick="selectChip(this,'styleChips')">Watercolor</div>
+        <div class="schip" onclick="selectChip(this,'styleChips')">3D Render</div>
+        <div class="schip" onclick="selectChip(this,'styleChips')">Neon</div>
+        <div class="schip" onclick="selectChip(this,'styleChips')">Vintage Film</div>
+      </div>
+
+      <div class="p-label" style="margin-top:12px;">🎬 Animation</div>
+      <div class="anim-chips" id="animChips">
+        <div class="achip active" onclick="selectChip(this,'animChips')">Ken Burns</div>
+        <div class="achip" onclick="selectChip(this,'animChips')">Zoom In</div>
+        <div class="achip" onclick="selectChip(this,'animChips')">Pan Left</div>
+        <div class="achip" onclick="selectChip(this,'animChips')">Pan Right</div>
+        <div class="achip" onclick="selectChip(this,'animChips')">Fade</div>
+        <div class="achip" onclick="selectChip(this,'animChips')">Shake</div>
+      </div>
+
+      <div class="p-label" style="margin-top:12px;">📐 Aspect Ratio</div>
+      <div class="ratio-chips" id="ratioChips">
+        <div class="rchip active" onclick="selectChip(this,'ratioChips');setRatio('16:9')">16:9</div>
+        <div class="rchip" onclick="selectChip(this,'ratioChips');setRatio('9:16')">9:16</div>
+        <div class="rchip" onclick="selectChip(this,'ratioChips');setRatio('1:1')">1:1</div>
+      </div>
+    </div>
+
+    <!-- Voice -->
+    <div class="p-section">
+      <div class="p-label">🎙 Voiceover</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+          <input type="checkbox" id="voiceEnabled" checked style="accent-color:var(--a1);"> Enable Voice
+        </label>
+        <select class="sel" id="voiceLang" style="flex:1;">
+          <option value="en-US">English (US)</option>
+          <option value="en-GB">English (UK)</option>
+          <option value="ur-PK">Urdu</option>
+          <option value="hi-IN">Hindi</option>
+          <option value="ar-SA">Arabic</option>
+          <option value="fr-FR">French</option>
+          <option value="de-DE">German</option>
+        </select>
+      </div>
+      <div class="voice-row" style="margin-top:10px;">
+        <span class="voice-label">Speed</span>
+        <input type="range" class="voice-range" id="voiceSpeed" min="0.5" max="2" step="0.1" value="1">
+        <span id="voiceSpeedVal" style="font-size:11px;color:var(--a1);width:28px;">1.0</span>
+      </div>
+      <div class="voice-row">
+        <span class="voice-label">Pitch</span>
+        <input type="range" class="voice-range" id="voicePitch" min="0.5" max="2" step="0.1" value="1">
+        <span id="voicePitchVal" style="font-size:11px;color:var(--a1);width:28px;">1.0</span>
+      </div>
+      <div class="voice-row">
+        <span class="voice-label">Volume</span>
+        <input type="range" class="voice-range" id="voiceVol" min="0" max="1" step="0.1" value="1">
+        <span id="voiceVolVal" style="font-size:11px;color:var(--a1);width:28px;">1.0</span>
+      </div>
+
+      <!-- Voice test -->
+      <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:10px;font-size:12px;" onclick="testVoice()">🎙 Test Voice</button>
+    </div>
+
+    <!-- Text overlay settings -->
+    <div class="p-section">
+      <div class="p-label">✏️ Text Overlays</div>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+          <input type="checkbox" id="showSubtitles" checked style="accent-color:var(--a1);"> Show scene subtitles
+        </label>
+        <label style="display:flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;">
+          <input type="checkbox" id="showTitle" checked style="accent-color:var(--a1);"> Show title card
+        </label>
+        <label style="display:flex;align-items:center;gap=6px;font-size:12px;cursor:pointer;">
+          <input type="checkbox" id="showProgress" style="accent-color:var(--a1);"> Show progress bar
+        </label>
+      </div>
+      <div style="margin-top:10px;">
+        <div class="p-label">Custom Title</div>
+        <input type="text" id="customTitle" placeholder="Leave blank to use AI title…"
+          style="width:100%;background:var(--s2);border:1px solid var(--border2);color:var(--text);font-family:Inter,sans-serif;font-size:12px;padding:8px 10px;border-radius:8px;">
+      </div>
+    </div>
+
+    <!-- Scenes list -->
+    <div class="p-label" style="padding:14px 14px 0;">🎬 Generated Scenes</div>
+    <div class="scenes-list" id="scenesList">
+      <div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">
+        Generate your video to see scenes here
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT — PREVIEW -->
+  <div class="panel-r">
+
+    <!-- Export quick row -->
+    <div class="export-row">
+      <div class="exp-btn" onclick="downloadCurrentFrame()">🖼 Save Frame</div>
+      <div class="exp-btn" onclick="replayScene()">🔁 Replay Scene</div>
+      <div class="exp-btn" onclick="speakCurrentScene()">🎙 Read Aloud</div>
+      <div class="exp-btn" onclick="exportVideo()">📹 Export</div>
+    </div>
+
+    <!-- Canvas -->
+    <div class="preview-wrap" id="previewWrap">
+      <canvas id="mainCanvas" width="854" height="480"></canvas>
+      <div class="empty-canvas" id="emptyState">
+        <div class="ec-icon">✦</div>
+        <div class="ec-text">
+          <strong style="color:var(--a1);font-family:Syne,sans-serif;font-size:18px;">CutMotion AI</strong><br>
+          Type your idea and click<br><strong>Generate Video</strong>
+        </div>
+        <button class="btn btn-primary" onclick="openGenModal()" style="margin-top:8px;">✦ Generate Video</button>
+      </div>
+      <div class="canvas-overlay" id="canvasOverlay" style="display:none;">
+        <div class="canvas-ctrls">
+          <div class="prog-bar-wrap" onclick="seekOnBar(event)">
+            <div class="prog-bar-fill" id="progFill" style="width:0%"></div>
+          </div>
+          <div class="play-row">
+            <button class="play-btn-big" id="playBtn" onclick="togglePlay()">▶</button>
+            <span class="time-badge" id="timeBadge">0:00 / 0:00</span>
+            <div class="scene-nav">
+              <div class="snav-btn" onclick="prevScene()">⏮ Prev</div>
+              <div class="snav-btn" id="sceneIndicator">Scene 1/1</div>
+              <div class="snav-btn" onclick="nextScene()">Next ⏭</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Timeline strip -->
+    <div class="timeline-strip" id="timelineStrip">
+      <div style="color:var(--muted);font-size:12px;padding:0 8px;">Scenes will appear here after generation</div>
+    </div>
+
+    <!-- Voice indicator -->
+    <div class="voice-panel">
+      <span class="vp-label">Voice</span>
+      <div class="voice-speaking" id="voiceIndicator" style="display:none;">
+        <div class="vs-bar" style="height:6px;"></div>
+        <div class="vs-bar"></div>
+        <div class="vs-bar"></div>
+        <div class="vs-bar"></div>
+        <div class="vs-bar" style="height:6px;"></div>
+      </div>
+      <span id="voiceStatus" style="font-size:11px;color:var(--muted2);">Not speaking</span>
+      <span style="margin-left:auto;font-size:11px;color:var(--muted);" id="currentSceneVoice"></span>
+    </div>
+  </div>
+</div>
+
+<!-- GENERATE MODAL -->
+<div class="gen-overlay" id="genOverlay">
+  <div class="gen-modal">
+    <div class="gen-title">✦ Generating Your Video</div>
+    <div class="gen-sub" id="genSubText">AI is crafting your video scene by scene. This uses free APIs — please wait.</div>
+
+    <div class="gen-step" id="step1">
+      <div class="gs-icon">🧠</div>
+      <div class="gs-info">
+        <div class="gs-name">Writing Script</div>
+        <div class="gs-detail" id="step1Detail">Breaking your idea into cinematic scenes…</div>
+      </div>
+      <div class="gs-status" id="step1Status">⏳</div>
+    </div>
+
+    <div class="gen-step" id="step2">
+      <div class="gs-icon">🎨</div>
+      <div class="gs-info">
+        <div class="gs-name">Generating Images</div>
+        <div class="gs-detail" id="step2Detail">Pollinations AI creating visuals for each scene…</div>
+      </div>
+      <div class="gs-status" id="step2Status">⏳</div>
+    </div>
+
+    <div class="gen-step" id="step3">
+      <div class="gs-icon">🎬</div>
+      <div class="gs-info">
+        <div class="gs-name">Building Animation</div>
+        <div class="gs-detail" id="step3Detail">Adding motion, transitions, text overlays…</div>
+      </div>
+      <div class="gs-status" id="step3Status">⏳</div>
+    </div>
+
+    <div class="gen-step" id="step4">
+      <div class="gs-icon">🎙</div>
+      <div class="gs-info">
+        <div class="gs-name">Voice Setup</div>
+        <div class="gs-detail" id="step4Detail">Preparing text-to-speech narration…</div>
+      </div>
+      <div class="gs-status" id="step4Status">⏳</div>
+    </div>
+
+    <div class="gen-prog-wrap">
+      <div class="gen-prog-fill" id="genProgFill" style="width:0%"></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted2);margin-top:8px;text-align:right;" id="genPercent">0%</div>
+
+    <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+      <button class="btn btn-ghost" onclick="cancelGeneration()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOASTS -->
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+const S = {
+  scenes: [],           // {id, prompt, imageUrl, imageEl, voiceText, duration, loaded}
+  currentScene: 0,
+  playing: false,
+  frameTime: 0,         // 0..duration within current scene
+  ratio: '16:9',
+  animStyle: 'Ken Burns',
+  imgStyle: 'Cinematic',
+  generationCancelled: false,
+  videoTitle: '',
+};
+
+let raf = null;
+let lastTS = null;
+let voices = [];
+
+// Canvas
+const canvas = document.getElementById('mainCanvas');
+const ctx = canvas.getContext('2d');
+
+// ═══════════════════════════════════════
+// VOICES
+// ═══════════════════════════════════════
+function loadVoices() {
+  voices = speechSynthesis.getVoices();
+  if (!voices.length) setTimeout(loadVoices, 200);
+}
+speechSynthesis.onvoiceschanged = loadVoices;
+loadVoices();
+
+document.getElementById('voiceSpeed').oninput = e => document.getElementById('voiceSpeedVal').textContent = parseFloat(e.target.value).toFixed(1);
+document.getElementById('voicePitch').oninput = e => document.getElementById('voicePitchVal').textContent = parseFloat(e.target.value).toFixed(1);
+document.getElementById('voiceVol').oninput = e => document.getElementById('voiceVolVal').textContent = parseFloat(e.target.value).toFixed(1);
+
+function getVoice() {
+  const lang = document.getElementById('voiceLang').value;
+  const v = voices.find(v => v.lang.startsWith(lang.split('-')[0]) && v.lang === lang)
+         || voices.find(v => v.lang.startsWith(lang.split('-')[0]))
+         || voices[0];
+  return v;
+}
+
+function speak(text, onEnd) {
+  if (!document.getElementById('voiceEnabled').checked) { if(onEnd) onEnd(); return; }
+  speechSynthesis.cancel();
+  const utt = new SpeechSynthesisUtterance(text);
+  utt.voice = getVoice();
+  utt.rate = parseFloat(document.getElementById('voiceSpeed').value);
+  utt.pitch = parseFloat(document.getElementById('voicePitch').value);
+  utt.volume = parseFloat(document.getElementById('voiceVol').value);
+  utt.onstart = () => {
+    document.getElementById('voiceIndicator').style.display = 'flex';
+    document.getElementById('voiceStatus').textContent = 'Speaking…';
+  };
+  utt.onend = () => {
+    document.getElementById('voiceIndicator').style.display = 'none';
+    document.getElementById('voiceStatus').textContent = 'Not speaking';
+    if (onEnd) onEnd();
+  };
+  utt.onerror = () => { if(onEnd) onEnd(); };
+  speechSynthesis.speak(utt);
+}
+
+function testVoice() {
+  const lang = document.getElementById('voiceLang').value;
+  const texts = { 'ur-PK':'یہ CutMotion AI کی آواز ہے۔', 'hi-IN':'यह CutMotion AI की आवाज़ है।', 'ar-SA':'هذا هو صوت CutMotion AI.' };
+  speak(texts[lang] || 'This is CutMotion AI voice. Your video is ready.');
+  toast('Testing voice…','i');
+}
+
+function speakCurrentScene() {
+  const sc = S.scenes[S.currentScene];
+  if (sc) speak(sc.voiceText || sc.prompt);
+}
+
+// ═══════════════════════════════════════
+// CHIP SELECTION
+// ═══════════════════════════════════════
+function selectChip(el, groupId) {
+  document.querySelectorAll('#'+groupId+' .schip, #'+groupId+' .achip, #'+groupId+' .rchip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  if (groupId==='animChips') S.animStyle = el.textContent;
+  if (groupId==='styleChips') S.imgStyle = el.textContent;
+}
+
+function setRatio(r) {
+  S.ratio = r;
+  if (r==='9:16') { canvas.width=270; canvas.height=480; }
+  else if (r==='1:1') { canvas.width=480; canvas.height=480; }
+  else { canvas.width=854; canvas.height=480; }
+  if (S.scenes.length) drawScene(S.scenes[S.currentScene], S.frameTime);
+}
+
+// ═══════════════════════════════════════
+// CLAUDE API — SCRIPT GENERATION
+// ═══════════════════════════════════════
+async function generateScript(prompt, numScenes) {
+  const styleNote = `Image style: ${S.imgStyle}. Animation: ${S.animStyle}.`;
+  const sysPrompt = `You are a cinematic video script writer. Given a user's video idea, generate exactly ${numScenes} scenes for a short AI video. ${styleNote}
+
+Return ONLY valid JSON, no markdown, no explanation:
+{
+  "title": "Video title (max 6 words)",
+  "scenes": [
+    {
+      "id": 1,
+      "imagePrompt": "Detailed visual description for AI image generation, 15-25 words, cinematic, ${S.imgStyle} style",
+      "voiceText": "Narration text for this scene, 1-2 sentences, engaging",
+      "subtitle": "Short subtitle text shown on screen (max 8 words)"
+    }
+  ]
+}`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      model:'claude-sonnet-4-6',
+      max_tokens:1000,
+      system: sysPrompt,
+      messages:[{role:'user', content: prompt}]
+    })
+  });
+  const data = await res.json();
+  const raw = data.content?.map(b=>b.text||'').join('');
+  const clean = raw.replace(/```json|```/g,'').trim();
+  return JSON.parse(clean);
+}
+
+// ═══════════════════════════════════════
+// POLLINATIONS — IMAGE GENERATION (FREE)
+// ═══════════════════════════════════════
+async function generateImage(prompt) {
+  const styleMap = {
+    'Cinematic':'cinematic photography, film grain, anamorphic lens',
+    'Anime':'anime art style, studio ghibli, detailed illustration',
+    'Realistic':'photorealistic, 8k, detailed, natural lighting',
+    'Digital Art':'digital art, concept art, artstation trending',
+    'Watercolor':'watercolor painting, soft colors, artistic',
+    '3D Render':'3d render, octane render, ray tracing, studio lighting',
+    'Neon':'neon lights, cyberpunk, glowing, dark atmosphere',
+    'Vintage Film':'vintage film photography, 35mm, film grain, retro colors',
+  };
+  const suffix = styleMap[S.imgStyle] || 'cinematic';
+  const fullPrompt = encodeURIComponent(`${prompt}, ${suffix}, high quality`);
+  const seed = Math.floor(Math.random()*99999);
+  const w = canvas.width; const h = canvas.height;
+  const url = `https://image.pollinations.ai/prompt/${fullPrompt}?width=${w}&height=${h}&seed=${seed}&nologo=true`;
+
+  return new Promise((res, rej) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => res(img);
+    img.onerror = () => {
+      // fallback: gradient placeholder
+      res(null);
+    };
+    img.src = url;
+    setTimeout(() => { if(!img.complete) res(null); }, 15000);
+  });
+}
+
+// ═══════════════════════════════════════
+// GENERATION FLOW
+// ═══════════════════════════════════════
+function openGenModal() {
+  const prompt = document.getElementById('mainPrompt').value.trim();
+  if (!prompt) { toast('Please enter a video idea first!','e'); return; }
+  document.getElementById('genOverlay').classList.add('open');
+  startGeneration(prompt);
+}
+
+function cancelGeneration() {
+  S.generationCancelled = true;
+  document.getElementById('genOverlay').classList.remove('open');
+  toast('Generation cancelled','i');
+}
+
+async function startGeneration(prompt) {
+  S.generationCancelled = false;
+  const numScenes = parseInt(document.getElementById('numScenes').value);
+  const sceneDur = parseInt(document.getElementById('duration').value);
+
+  // Reset steps
+  ['step1','step2','step3','step4'].forEach(id => {
+    document.getElementById(id).className = 'gen-step';
+    document.getElementById(id+'Status').textContent = '⏳';
+  });
+  setGenProg(0);
+
+  try {
+    // STEP 1: Script
+    setStep(1,'active'); setGenProg(5);
+    document.getElementById('step1Detail').textContent = 'Claude AI writing your script…';
+
+    let scriptData;
+    try {
+      scriptData = await generateScript(prompt, numScenes);
+    } catch(e) {
+      // Fallback: generate script without API (demo mode)
+      scriptData = generateFallbackScript(prompt, numScenes);
+      toast('Using built-in script generator','i');
+    }
+
+    if (S.generationCancelled) return;
+    S.videoTitle = scriptData.title || 'My Video';
+    setStep(1,'done','✅'); setGenProg(20);
+
+    // STEP 2: Images
+    setStep(2,'active');
+    const sceneObjs = [];
+
+    for (let i=0; i<scriptData.scenes.length; i++) {
+      if (S.generationCancelled) return;
+      const sc = scriptData.scenes[i];
+      document.getElementById('step2Detail').textContent = `Generating image ${i+1}/${scriptData.scenes.length}…`;
+      setGenProg(20 + (i/scriptData.scenes.length)*50);
+
+      const img = await generateImage(sc.imagePrompt);
+      sceneObjs.push({
+        id: sc.id || (i+1),
+        prompt: sc.imagePrompt,
+        voiceText: sc.voiceText,
+        subtitle: sc.subtitle || sc.voiceText?.substring(0,40),
+        imageEl: img,
+        duration: sceneDur,
+        loaded: !!img,
+      });
+
+      // Update strip incrementally
+      updateStripThumb(i, img);
+    }
+
+    if (S.generationCancelled) return;
+    setStep(2,'done','✅'); setGenProg(75);
+
+    // STEP 3: Animation
+    setStep(3,'active');
+    document.getElementById('step3Detail').textContent = 'Building animated scenes…';
+    await delay(600);
+    S.scenes = sceneObjs;
+    S.currentScene = 0;
+    S.frameTime = 0;
+    renderScenesPanel();
+    renderTimelineStrip();
+    setStep(3,'done','✅'); setGenProg(90);
+
+    // STEP 4: Voice
+    setStep(4,'active');
+    document.getElementById('step4Detail').textContent = 'Voice system ready!';
+    await delay(400);
+    setStep(4,'done','✅'); setGenProg(100);
+
+    await delay(500);
+    document.getElementById('genOverlay').classList.remove('open');
+
+    // Show preview
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('canvasOverlay').style.display = 'flex';
+    document.getElementById('customTitle').placeholder = S.videoTitle;
+    updateSceneIndicator();
+    drawScene(S.scenes[0], 0);
+    toast(`✦ "${S.videoTitle}" ready! Press play.`, 's');
+
+  } catch(e) {
+    console.error(e);
+    setStep(1,'','❌');
+    toast('Error: '+e.message,'e');
+    await delay(1000);
+    document.getElementById('genOverlay').classList.remove('open');
+  }
+}
+
+function generateFallbackScript(prompt, n) {
+  const words = prompt.split(' ').slice(0,4).join(' ');
+  const templates = [
+    {imagePrompt:`Cinematic opening shot, ${prompt}, golden hour lighting, wide angle`,voiceText:`Welcome to this cinematic journey. ${prompt}.`,subtitle:'Opening Scene'},
+    {imagePrompt:`Close-up detail shot, ${words}, dramatic lighting, shallow depth of field`,voiceText:`Every detail tells a story. Watch closely.`,subtitle:'The Details'},
+    {imagePrompt:`Wide establishing shot, ${words}, epic scale, atmospheric`,voiceText:`The scale of this world is breathtaking.`,subtitle:'The World'},
+    {imagePrompt:`Action moment, ${words}, motion blur, dynamic angle`,voiceText:`This is where everything comes together.`,subtitle:'The Moment'},
+    {imagePrompt:`Cinematic finale, ${words}, sunset colors, emotional`,voiceText:`An unforgettable experience. Remember this moment.`,subtitle:'The End'},
+    {imagePrompt:`Aerial view, ${words}, birds eye perspective, vast landscape`,voiceText:`From above, the world looks different.`,subtitle:'Overview'},
+    {imagePrompt:`Night scene, ${words}, stars, moonlight, mysterious atmosphere`,voiceText:`When darkness falls, beauty remains.`,subtitle:'Night'},
+    {imagePrompt:`Reflection shot, ${words}, water mirror, peaceful`,voiceText:`In stillness, we find clarity.`,subtitle:'Reflection'},
+  ];
+  return {
+    title: words + ' Story',
+    scenes: templates.slice(0,n).map((t,i)=>({id:i+1,...t}))
+  };
+}
+
+// ═══════════════════════════════════════
+// DRAWING
+// ═══════════════════════════════════════
+function drawScene(scene, t) {
+  if (!scene) return;
+  const w = canvas.width, h = canvas.height;
+  const dur = scene.duration;
+  const progress = Math.min(t / dur, 1);
+
+  ctx.clearRect(0,0,w,h);
+
+  if (scene.imageEl) {
+    ctx.save();
+    // Animation
+    const anim = S.animStyle;
+    let scale = 1, tx = 0, ty = 0;
+
+    if (anim === 'Ken Burns') {
+      scale = 1 + progress * 0.08;
+      tx = -progress * w * 0.03;
+      ty = -progress * h * 0.02;
+    } else if (anim === 'Zoom In') {
+      scale = 1 + progress * 0.15;
+    } else if (anim === 'Pan Left') {
+      tx = -progress * w * 0.08;
+    } else if (anim === 'Pan Right') {
+      tx = progress * w * 0.08;
+    } else if (anim === 'Fade') {
+      ctx.globalAlpha = 0.3 + progress * 0.7;
+    } else if (anim === 'Shake') {
+      tx = Math.sin(t*30)*3*(1-progress);
+      ty = Math.cos(t*25)*2*(1-progress);
+    }
+
+    ctx.translate(w/2 + tx, h/2 + ty);
+    ctx.scale(scale, scale);
+    ctx.drawImage(scene.imageEl, -w/2, -h/2, w, h);
+    ctx.restore();
+    ctx.globalAlpha = 1;
+  } else {
+    // Gradient placeholder
+    const colors = [
+      ['#1a0a3f','#3d1a7a'],['#0a1a3f','#1a3d7a'],
+      ['#1a2a0a','#3d5a1a'],['#3f0a1a','#7a1a3d'],
+      ['#0a3f3f','#1a7a5a'],
+    ];
+    const pair = colors[scene.id % colors.length];
+    const grad = ctx.createLinearGradient(0,0,w,h);
+    grad.addColorStop(0, pair[0]);
+    grad.addColorStop(1, pair[1]);
+    ctx.fillStyle = grad;
+    ctx.fillRect(0,0,w,h);
+
+    // Animated particles
+    ctx.save();
+    for(let i=0;i<20;i++){
+      const px = (Math.sin(t*0.5+i*1.7)*0.5+0.5)*w;
+      const py = (Math.cos(t*0.4+i*2.1)*0.5+0.5)*h;
+      const r = 1+Math.sin(t+i)*1.5;
+      ctx.beginPath();
+      ctx.arc(px,py,r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(255,255,255,${0.1+Math.sin(t+i)*0.1})`;
+      ctx.fill();
+    }
+    ctx.restore();
+
+    // Scene prompt text
+    ctx.save();
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.font = `italic 13px Inter, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText(scene.prompt?.substring(0,50)+'…', w/2, h/2);
+    ctx.restore();
+  }
+
+  // Transition: fade in/out
+  const fadeIn = Math.min(progress*5, 1);
+  const fadeOut = Math.max(0, 1 - (progress - 0.85) / 0.15);
+  const fadeAlpha = (1 - fadeIn) * (progress < 0.1 ? 1 : 0) + (1 - fadeOut) * (progress > 0.85 ? 1 : 0);
+  if (fadeAlpha > 0) {
+    ctx.fillStyle = `rgba(0,0,0,${Math.min(fadeAlpha,1)})`;
+    ctx.fillRect(0,0,w,h);
+  }
+
+  // Title card (first scene)
+  const showTitle = document.getElementById('showTitle').checked;
+  if (showTitle && S.currentScene === 0 && progress < 0.4) {
+    const title = document.getElementById('customTitle').value || S.videoTitle || 'My Video';
+    const alpha = Math.min(progress * 5, 1) * Math.max(0, 1 - (progress - 0.3) / 0.1);
+    ctx.save();
+    ctx.globalAlpha = alpha;
+    // Semi-transparent black bar
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(0, h/2-50, w, 80);
+    ctx.font = `bold ${Math.floor(w/20)}px Syne, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = 'rgba(108,63,255,0.8)';
+    ctx.shadowBlur = 20;
+    ctx.fillText(title, w/2, h/2+6);
+    ctx.shadowBlur = 0;
+    ctx.restore();
+  }
+
+  // Subtitle
+  const showSubs = document.getElementById('showSubtitles').checked;
+  if (showSubs && scene.subtitle && progress > 0.1 && progress < 0.9) {
+    const subAlpha = Math.min((progress-0.1)*6,1) * Math.max(0,1-(progress-0.8)/0.1);
+    ctx.save();
+    ctx.globalAlpha = subAlpha;
+    const subText = scene.subtitle;
+    const fs = Math.max(14, Math.floor(w/40));
+    ctx.font = `600 ${fs}px Inter, sans-serif`;
+    const tw = ctx.measureText(subText).width;
+    ctx.fillStyle = 'rgba(0,0,0,0.65)';
+    ctx.beginPath();
+    ctx.roundRect(w/2-tw/2-16, h-50-fs/2, tw+32, fs+20, 8);
+    ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.textAlign = 'center';
+    ctx.fillText(subText, w/2, h-37);
+    ctx.restore();
+  }
+
+  // Scene number
+  ctx.save();
+  ctx.font = `500 11px Inter, sans-serif`;
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  ctx.textAlign = 'right';
+  ctx.fillText(`${S.currentScene+1} / ${S.scenes.length}`, w-12, 22);
+  ctx.restore();
+
+  // Progress bar overlay
+  if (document.getElementById('showProgress').checked) {
+    const totalProg = (S.currentScene + progress) / S.scenes.length;
+    ctx.fillStyle = 'rgba(108,63,255,0.7)';
+    ctx.fillRect(0,0,w*totalProg,3);
+  }
+}
+
+// ═══════════════════════════════════════
+// PLAYBACK
+// ═══════════════════════════════════════
+function togglePlay() {
+  if (!S.scenes.length) return;
+  S.playing = !S.playing;
+  document.getElementById('playBtn').textContent = S.playing ? '⏸' : '▶';
+  if (S.playing) {
+    lastTS = null;
+    raf = requestAnimationFrame(playLoop);
+    // Speak current scene
+    const sc = S.scenes[S.currentScene];
+    if (sc) speak(sc.voiceText, () => {});
+  } else {
+    cancelAnimationFrame(raf);
+    speechSynthesis.cancel();
+    document.getElementById('voiceIndicator').style.display = 'none';
+    document.getElementById('voiceStatus').textContent = 'Not speaking';
+  }
+}
+
+function playLoop(ts) {
+  if (!S.playing) return;
+  if (!lastTS) lastTS = ts;
+  const dt = (ts - lastTS) / 1000;
+  lastTS = ts;
+
+  S.frameTime += dt;
+  const sc = S.scenes[S.currentScene];
+  if (!sc) { S.playing = false; return; }
+
+  if (S.frameTime >= sc.duration) {
+    S.frameTime = 0;
+    S.currentScene++;
+    if (S.currentScene >= S.scenes.length) {
+      S.currentScene = 0;
+      S.playing = false;
+      document.getElementById('playBtn').textContent = '▶';
+      speechSynthesis.cancel();
+      updateUI();
+      drawScene(S.scenes[0], 0);
+      return;
+    }
+    updateUI();
+    // Speak next scene
+    const nextSc = S.scenes[S.currentScene];
+    if (nextSc && document.getElementById('voiceEnabled').checked) {
+      speechSynthesis.cancel();
+      speak(nextSc.voiceText, ()=>{});
+    }
+  }
+
+  drawScene(S.scenes[S.currentScene], S.frameTime);
+  updateUI();
+  raf = requestAnimationFrame(playLoop);
+}
+
+function updateUI() {
+  if (!S.scenes.length) return;
+  const sc = S.scenes[S.currentScene];
+  const totalTime = S.scenes.reduce((a,c)=>a+c.duration,0);
+  const elapsedBefore = S.scenes.slice(0,S.currentScene).reduce((a,c)=>a+c.duration,0);
+  const elapsed = elapsedBefore + S.frameTime;
+  const progress = (elapsed / totalTime) * 100;
+  document.getElementById('progFill').style.width = progress + '%';
+  const fmt = s => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
+  document.getElementById('timeBadge').textContent = `${fmt(elapsed)} / ${fmt(totalTime)}`;
+  updateSceneIndicator();
+  // Highlight strip
+  document.querySelectorAll('.strip-thumb').forEach((el,i)=>el.classList.toggle('active',i===S.currentScene));
+}
+
+function seekOnBar(e) {
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = (e.clientX - rect.left) / rect.width;
+  const totalTime = S.scenes.reduce((a,c)=>a+c.duration,0);
+  let target = pct * totalTime;
+  for (let i=0;i<S.scenes.length;i++){
+    if (target <= S.scenes[i].duration) { S.currentScene=i; S.frameTime=target; break; }
+    target -= S.scenes[i].duration;
+  }
+  drawScene(S.scenes[S.currentScene], S.frameTime);
+  updateUI();
+}
+
+function prevScene() {
+  if (S.currentScene > 0) { S.currentScene--; S.frameTime=0; drawScene(S.scenes[S.currentScene],0); updateUI(); }
+}
+function nextScene() {
+  if (S.currentScene < S.scenes.length-1) { S.currentScene++; S.frameTime=0; drawScene(S.scenes[S.currentScene],0); updateUI(); }
+}
+function replayScene() { S.frameTime=0; if(!S.playing) drawScene(S.scenes[S.currentScene],0); speak(S.scenes[S.currentScene]?.voiceText); }
+
+function updateSceneIndicator() {
+  document.getElementById('sceneIndicator').textContent = `Scene ${S.currentScene+1}/${S.scenes.length}`;
+}
+
+// ═══════════════════════════════════════
+// UI RENDERING
+// ═══════════════════════════════════════
+function renderScenesPanel() {
+  const list = document.getElementById('scenesList');
+  list.innerHTML = '';
+  S.scenes.forEach((sc,i) => {
+    const el = document.createElement('div');
+    el.className = 'scene-card ' + (sc.loaded ? 'done' : '');
+    el.id = 'sc_' + i;
+    el.onclick = () => { S.currentScene=i; S.frameTime=0; drawScene(sc,0); updateUI(); };
+    el.innerHTML = `
+      <div class="sc-top">
+        <div class="sc-num">${sc.id}</div>
+        <div class="sc-title">${sc.subtitle||'Scene '+sc.id}</div>
+        <div class="sc-status">${sc.loaded?'✅':'🔄'}</div>
+      </div>
+      <div class="sc-prompt">${sc.prompt?.substring(0,70)}…</div>
+      <div class="sc-duration">⏱ ${sc.duration}s • ${S.animStyle}</div>
+    `;
+    list.appendChild(el);
+  });
+}
+
+function renderTimelineStrip() {
+  const strip = document.getElementById('timelineStrip');
+  strip.innerHTML = '';
+  S.scenes.forEach((sc,i)=>{
+    const el = document.createElement('div');
+    el.className = 'strip-thumb ' + (i===S.currentScene?'active':'');
+    el.onclick = () => { S.currentScene=i; S.frameTime=0; drawScene(sc,0); updateUI(); };
+    if (sc.imageEl) {
+      const img = document.createElement('img');
+      img.src = sc.imageEl.src;
+      el.appendChild(img);
+    } else {
+      el.textContent = '🎬';
+    }
+    el.innerHTML += `<div class="th-num">${i+1}</div>`;
+    strip.appendChild(el);
+  });
+}
+
+function updateStripThumb(i, img) {
+  const strip = document.getElementById('timelineStrip');
+  // Replace placeholder if already rendered
+  const existing = strip.children[i];
+  if (existing && img) {
+    const imgEl = document.createElement('img');
+    imgEl.src = img.src;
+    existing.innerHTML = '';
+    existing.appendChild(imgEl);
+    existing.innerHTML += `<div class="th-num">${i+1}</div>`;
+  }
+}
+
+// ═══════════════════════════════════════
+// EXPORT
+// ═══════════════════════════════════════
+function downloadCurrentFrame() {
+  if (!S.scenes.length) { toast('No video to export','e'); return; }
+  drawScene(S.scenes[S.currentScene], S.frameTime);
+  canvas.toBlob(blob => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `cutmotion_frame_${S.currentScene+1}.png`;
+    a.click();
+    toast('Frame saved!','s');
+  }, 'image/png');
+}
+
+function exportVideo() {
+  if (!S.scenes.length) { toast('Generate a video first!','e'); return; }
+
+  // Export all frames as a zip of images or offer instructions
+  toast('Exporting current frame as PNG…','i');
+  setTimeout(()=>{
+    downloadCurrentFrame();
+    toast('💡 Tip: For full video export, import the frames into MeertCut!','i');
+  }, 500);
+}
+
+// ═══════════════════════════════════════
+// MODAL HELPERS
+// ═══════════════════════════════════════
+function setStep(n, state, icon='') {
+  const el = document.getElementById('step'+n);
+  el.className = 'gen-step' + (state?' '+state:'');
+  if (icon) document.getElementById('step'+n+'Status').textContent = icon;
+}
+
+function setGenProg(pct) {
+  document.getElementById('genProgFill').style.width = pct+'%';
+  document.getElementById('genPercent').textContent = Math.floor(pct)+'%';
+}
+
+function clearAll() {
+  if (S.playing) togglePlay();
+  S.scenes = []; S.currentScene = 0; S.frameTime = 0;
+  document.getElementById('emptyState').style.display = '';
+  document.getElementById('canvasOverlay').style.display = 'none';
+  document.getElementById('scenesList').innerHTML = '<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px;">Generate your video to see scenes here</div>';
+  document.getElementById('timelineStrip').innerHTML = '<div style="color:var(--muted);font-size:12px;padding:0 8px;">Scenes will appear here after generation</div>';
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  speechSynthesis.cancel();
+  toast('Cleared','i');
+}
+
+const delay = ms => new Promise(r => setTimeout(r, ms));
+
+// ═══════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════
+function toast(msg, type='i') {
+  const icons = {s:'✅',e:'❌',i:'✦'};
+  const el = document.createElement('div');
+  el.className = 'toast '+type;
+  el.innerHTML = `<span>${icons[type]}</span><span>${msg}</span>`;
+  document.getElementById('toastWrap').appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transform='translateX(110%)'; el.style.transition='all 0.3s'; setTimeout(()=>el.remove(),300); }, 3500);
+}
+
+// ═══════════════════════════════════════
+// INIT CANVAS
+// ═══════════════════════════════════════
+(function initCanvas(){
+  const w=canvas.width, h=canvas.height;
+  const grad = ctx.createLinearGradient(0,0,w,h);
+  grad.addColorStop(0,'#05070d'); grad.addColorStop(1,'#0f1525');
+  ctx.fillStyle = grad; ctx.fillRect(0,0,w,h);
+
+  // Floating particles
+  let particles = Array.from({length:40},()=>({x:Math.random()*w,y:Math.random()*h,vx:(Math.random()-0.5)*0.3,vy:(Math.random()-0.5)*0.3,r:Math.random()*1.5+0.5,a:Math.random()*0.5+0.1}));
+  function animBg(){
+    if(S.scenes.length) return;
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle='#05070d'; ctx.fillRect(0,0,w,h);
+    particles.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy;
+      if(p.x<0||p.x>w) p.vx*=-1;
+      if(p.y<0||p.y>h) p.vy*=-1;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(108,63,255,${p.a})`;
+      ctx.fill();
+    });
+    requestAnimationFrame(animBg);
+  }
+  animBg();
+})();
+
+toast('✦ CutMotion ready! Enter your idea and generate.','s');
+</script>
+</body>
+</html>
